@@ -3,9 +3,9 @@
 ## Estado actual
 - **Fase 1** (frontend + localStorage): ✅ completada. Versión guardada en el commit `05dab7b`
 - **Fase 2** (backend NestJS en memoria): ✅ completada (20/11/2026). Versión guardada en el commit `ed538ec`. Pendiente: prueba manual en navegador
-- **Fase 3** (MongoDB + Mongoose): ✅ completada (20/11/2026). Pendiente: prueba manual en navegador y commit
-- **Siguiente:** proyecto completo (3 fases). Pendiente revisar los avisos de `npm audit`
-- **Git/GitHub:** repo https://github.com/CrisGoPa/DEL_PRUEBACIFOUI01 (rama `main`). Último commit subido: `ed538ec Fase 2 completa: backend NestJS en memoria + fetch`
+- **Fase 3** (MongoDB + Mongoose): ✅ completada (20/11/2026). Versión guardada en el commit `cb06eaf` (push hecho). Pendiente: prueba manual en navegador
+- **Siguiente:** Fase 4, por definir (no está en el CLAUDE.md)
+- **Git/GitHub:** repo https://github.com/CrisGoPa/DEL_PRUEBACIFOUI01 (rama `main`). Último commit subido: `cb06eaf Fase 3 completa: MongoDB con Mongoose`
 
 ## Plan Fase 1
 | # | Paso | Estado | Cómo se comprueba |
@@ -92,7 +92,8 @@
 - No había Homebrew ni MongoDB. Cristina pidió otra forma de instalar (sin Homebrew/admin). Opciones valoradas: descarga directa (elegida), Docker (requiere admin), Atlas (no local), mongodb-memory-server (no persistente).
 - MongoDB 8.0.38 descargado y verificado (SHA-256 oficial) en `~/mongodb`; datos en `~/mongodb/data`. Se arranca con `npm run db` (en `backend`).
 - `mongosh` no se descarga: si hace falta, `npx mongosh`.
-- Instalados `@nestjs/mongoose` 12 y `mongoose` 9.12.2. `npm audit` muestra avisos de vulnerabilidades en dependencias: pendiente de revisar.
+- Instalados `@nestjs/mongoose` 12 y `mongoose` 9.12.2. `npm audit`: 5 avisos, todos en `@nestjs/mau` (herramienta de despliegue de Nest, solo desarrollo, no se usa). Dependencias de ejecución: 0. Cristina decide dejarlo así (entorno de clase).
+- Fase 3 cerrada a petición de Cristina.
 - Archivos nuevos/cambiados en `backend/src`:
   - `products/product.schema.ts` (nuevo): campos con `required`, `min`, `enum`, `default`, `trim`; `timestamps`; `toJSON` devuelve `id`.
   - `products/products.service.ts`: usa `Model<Product>` (`find`, `findById`, `create`, `findByIdAndUpdate`, `findByIdAndDelete`); `isValidObjectId` → 404 si el id no vale.
@@ -148,11 +149,10 @@
 | 20/11 | Devolver `id` (no `_id`) con `toJSON` en el esquema | El frontend sigue igual |
 | 20/11 | Mantener DTOs + validación del esquema | Doble red: errores claros en la API y datos seguros en la BD |
 | 20/11 | URL de Mongo con `process.env.MONGODB_URI` y valor por defecto local | Igual que `PORT`; no requiere configurar nada |
+| 20/11 | No tocar los avisos de `npm audit` (vienen de `@nestjs/mau`, no usado) | Entorno de clase; sin riesgo real |
 
 ## Pendientes / notas
 - **Probar la Fase 3 en el navegador** (ver "Cómo probar").
-- **Commit de la Fase 3** cuando Cristina lo pida.
-- Revisar los avisos de `npm audit` en `backend`.
 - MongoDB vive fuera del proyecto (`~/mongodb`), no va a Git. En otro ordenador habría que repetir la descarga.
 - Los productos guardados en localStorage en la Fase 1 ya no se usan.
 - Las pruebas automáticas de interfaz con `jsdom` se bloquean; para probar sin navegador se usa Node + curl.
