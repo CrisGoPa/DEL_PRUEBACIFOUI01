@@ -4,9 +4,10 @@
 - **Fase 1** (frontend + localStorage): ✅ completada. Versión guardada en el commit `05dab7b`
 - **Fase 2** (backend NestJS en memoria): ✅ completada (20/11/2026). Versión guardada en el commit `ed538ec`. Pendiente: prueba manual en navegador
 - **Fase 3** (MongoDB + Mongoose): ✅ completada (20/11/2026). Versión guardada en el commit `cb06eaf` (push hecho). Pendiente: prueba manual en navegador
-- **Fase 4** (búsqueda y filtros): ✅ completada (20/11/2026). Pendiente: prueba manual en navegador y commit
-- **Siguiente:** por definir
-- **Git/GitHub:** repo https://github.com/CrisGoPa/DEL_PRUEBACIFOUI01 (rama `main`). Último commit subido: `cb06eaf Fase 3 completa: MongoDB con Mongoose`
+- **Fase 4** (búsqueda y filtros): ✅ completada (20/11/2026). Versión guardada en el commit `5637038` (push hecho). Pendiente: prueba manual en navegador
+- **Fase 5** (despliegue en Render + Atlas + GitHub Actions): 🟡 en curso. Archivos y guía (`DEPLOY.md`) listos; faltan los pasos manuales de la guía y el commit/push
+- **Siguiente:** Cristina: paso 0 (permiso Workflows en el token) y paso 1 (Atlas) de `DEPLOY.md`; Claude: commit + push cuando se pida
+- **Git/GitHub:** repo https://github.com/CrisGoPa/DEL_PRUEBACIFOUI01 (rama `main`). Último commit subido: `5637038 Fase 4 completa: búsqueda y filtros`
 
 ## Plan Fase 1
 | # | Paso | Estado | Cómo se comprueba |
@@ -131,6 +132,21 @@
   - `ultimaPeticion`: ignora respuestas antiguas si se escribe rápido.
   - Crear/editar/borrar siguen repintando con los filtros activos.
 - Pruebas frontend (11) contra la API → OK. `npm test` y lint OK. Base de datos vacía y servidores parados al terminar.
+- Commit `5637038 Fase 4 completa: búsqueda y filtros` → push hecho.
+- A petición de Cristina: arrancados MongoDB (`npm run db`) y la API (`npm run start:dev`) en local, añadidos 5 productos de ejemplo (MacBook Air 13, iPhone 16, Galaxy S25, iPad Air, Cargador USB-C 65W), abierta la web y consultada la BD con `npx mongosh` (en Mongo se ven `_id`, `__v` y fechas como `ISODate`; la API los transforma).
+- Instalado MongoDB Compass 1.53.3 (visor gráfico oficial) en `~/Applications` (sin admin; firma de MongoDB verificada). Conexión: `mongodb://localhost:27017` → `catalogo` → `products`.
+- Propuesta de despliegue en internet (Atlas + Render, sería Fase 5): pendiente de confirmación de Cristina.
+
+### 20/11/2026 — Fase 5 (despliegue)
+- Cristina: "subir este fullstack a Render (cuenta free), con guía, archivos y GitHub Actions".
+- Arquitectura: un único Web Service en Render (Nest sirve la web y la API) + MongoDB Atlas M0 + GitHub Actions (CI + Deploy Hook).
+- Cambios de código:
+  - `backend/src/main.ts`: `NestExpressApplication` + `useStaticAssets(../../frontend)` → la web en `/`.
+  - `frontend/app.js`: `API` = `http://localhost:3000/products` con `file://`, si no `/products`.
+- Archivos nuevos: `render.yaml` (Blueprint: rootDir backend, `npm ci && npm run build`, `npm run start:prod`, Node 22, `MONGODB_URI` secreta, `autoDeploy: false`, health check `/products`, región Frankfurt), `.github/workflows/deploy.yml` (jobs "Compilar y probar" y "Desplegar en Render"), `DEPLOY.md` (guía paso a paso + problemas frecuentes).
+- CLAUDE.md: Fase 5, alcance y estructura actualizados.
+- Comprobado en local: `http://localhost:3000/` sirve la web (HTML, CSS, JS) y `/products` la API; lint, build, tests y sintaxis del frontend OK.
+- Aviso: el token fine-grained necesita permiso **Workflows: Read and write** para poder hacer push de `.github/workflows/`.
 
 ## Decisiones
 | Fecha | Decisión | Motivo |
@@ -183,9 +199,17 @@
 | 20/11 | Filtrar en el servidor (query params), no en el navegador | Practicar query params y filtros de MongoDB |
 | 20/11 | Sin rango de precio ni ordenación por ahora | Fase pequeña |
 | 20/11 | Búsqueda sensible a acentos ("portatil" ≠ "portátil") | Aceptado: resolverlo complica la consulta |
+| 20/11 | Fase 5: Render free + MongoDB Atlas M0 | Cuenta de Render existente; Render no da MongoDB gratis |
+| 20/11 | Un único servicio: Nest sirve también el frontend | Una sola URL y sin problemas de CORS |
+| 20/11 | Blueprint `render.yaml` en lugar de configurar a mano | La configuración queda en el repo |
+| 20/11 | GitHub Actions: CI (lint, build, tests) y despliegue con Deploy Hook; `autoDeploy: false` en Render | Solo se publica si las pruebas pasan |
+| 20/11 | Node 22 en CI y en Render | Versión LTS soportada por Render |
+| 20/11 | Región Frankfurt (Render y Atlas) | La más cercana a España |
+| 20/11 | Cadena de Atlas y Deploy Hook solo como secretos (Render / GitHub), nunca en el código | Contienen credenciales |
 
 ## Pendientes / notas
-- **Probar la Fase 3 en el navegador** (ver "Cómo probar").
+- **Fase 5:** seguir `DEPLOY.md` (pasos 0, 1, 3 y 4 son de Cristina; el 2, commit + push, de Claude cuando se pida).
+- **Probar en el navegador** (ver "Cómo probar"). Ahora también en http://localhost:3000 (Nest sirve la web).
 - MongoDB vive fuera del proyecto (`~/mongodb`), no va a Git. En otro ordenador habría que repetir la descarga.
 - Los productos guardados en localStorage en la Fase 1 ya no se usan.
 - Las pruebas automáticas de interfaz con `jsdom` se bloquean; para probar sin navegador se usa Node + curl.

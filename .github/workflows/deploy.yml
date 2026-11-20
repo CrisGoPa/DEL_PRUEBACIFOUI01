@@ -1,0 +1,58 @@
+# CI/CD: en cada push a main, prueba el proyecto y, si todo va bien, despliega en Render
+name: CI y despliegue en Render
+
+on:
+  push:
+    branches: [main]
+  pull_request:          # en un PR solo se prueba, no se despliega
+  workflow_dispatch:     # botón "Run workflow" en GitHub para lanzarlo a mano
+
+jobs:
+  pruebas:
+    name: Compilar y probar
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Instalar Node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Compilar
+        run: npm run build
+
+      - name: Tests
+        run: npm test
+
+      - name: Comprobar sintaxis del frontend
+        run: node --check ../frontend/app.js
+
+  despliegue:
+    name: Desplegar en Render
+    needs: pruebas                       # solo si el job de pruebas ha ido bien
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Llamar al Deploy Hook de Render
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "Falta el secreto RENDER_DEPLOY_HOOK_URL (ver DEPLOY.md, paso 4)"
+            exit 1
+          fi
+          curl -fsS -X POST "$RENDER_DEPLOY_HOOK_URL"
+          echo "Despliegue solicitado a Render"

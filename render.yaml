@@ -1,0 +1,17 @@
+# Blueprint de Render: describe el servicio para crearlo en un clic (New → Blueprint)
+services:
+  - type: web
+    name: catalogo-productos
+    runtime: node
+    plan: free
+    region: frankfurt          # la más cercana a España
+    rootDir: backend           # los comandos se ejecutan dentro de /backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm run start:prod
+    healthCheckPath: /products # Render comprueba que la API responde
+    autoDeploy: false          # el despliegue lo lanza GitHub Actions cuando pasan las pruebas
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: MONGODB_URI
+        sync: false            # Render la pide al crear el Blueprint (cadena de MongoDB Atlas)

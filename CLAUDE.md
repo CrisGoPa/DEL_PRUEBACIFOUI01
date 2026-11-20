@@ -9,7 +9,7 @@ Código simple, legible y sin abstracciones innecesarias.
 - Web con un formulario y un listado de productos tecnológicos.
 - CRUD completo: crear, listar, ver, editar y borrar.
 - Sin autenticación.
-- Todo en local (macOS).
+- Desarrollo en local (macOS). Desde la Fase 5, publicado en Render (ver DEPLOY.md).
 - Git + GitHub (repo: https://github.com/CrisGoPa/DEL_PRUEBACIFOUI01, rama main).
   - Commit solo cuando yo lo pida, mostrando antes qué archivos se guardan.
   - Push solo cuando yo lo pida.
@@ -32,6 +32,9 @@ Código simple, legible y sin abstracciones innecesarias.
 - Fase 4 — Búsqueda y filtros: buscar por texto (nombre o marca, sin distinguir
   mayúsculas) y filtrar por categoría, en la API (query params) y en el frontend
   (buscador + desplegable encima de la tabla, filtra mientras se escribe).
+- Fase 5 — Despliegue: Render (free) con un único Web Service (Nest sirve la web y la API),
+  MongoDB Atlas (M0) como base de datos y GitHub Actions para probar y desplegar
+  (Deploy Hook) en cada push a main. Guía en DEPLOY.md.
 
 ## Modelo Producto
 - nombre (string, obligatorio)
@@ -46,6 +49,9 @@ Código simple, legible y sin abstracciones innecesarias.
 /frontend  -> index.html, styles.css, app.js   (Fase 1)
 /backend   -> proyecto NestJS, módulo products  (Fase 2)
 PROGRESO.md -> registro de pasos, decisiones y estado actual (mantener al día)
+DEPLOY.md   -> guía de despliegue en Render + Atlas + GitHub Actions   (Fase 5)
+render.yaml -> Blueprint de Render                                      (Fase 5)
+.github/workflows/deploy.yml -> CI (lint, build, tests) + despliegue    (Fase 5)
 
 ## Endpoints (Fase 2 en adelante)
 GET /products · GET /products/:id · POST /products · PATCH /products/:id · DELETE /products/:id

@@ -1,5 +1,7 @@
-// Dirección de la API (backend NestJS)
-const API = 'http://localhost:3000/products';
+// Dirección de la API (backend NestJS):
+// - abierta con doble clic (file://) → el servidor local
+// - servida por Nest (localhost:3000 o Render) → la misma web, ruta relativa
+const API = location.protocol === 'file:' ? 'http://localhost:3000/products' : '/products';
 
 // Referencias a elementos del HTML
 const lista = document.getElementById('lista-productos');
