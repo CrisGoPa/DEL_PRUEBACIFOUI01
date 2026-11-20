@@ -36,7 +36,7 @@ export class ProductsController {
   // DELETE /products/:id → borra (responde 204: sin contenido)
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id') id: string) {
-    this.productsService.remove(id);
+  async remove(@Param('id') id: string) {
+    await this.productsService.remove(id); // esperamos para que un 404 llegue al cliente
   }
 }

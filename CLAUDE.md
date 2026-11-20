@@ -19,7 +19,8 @@ Código simple, legible y sin abstracciones innecesarias.
 ## Stack
 - Frontend: HTML, CSS3 y JavaScript vanilla (sin frameworks ni bundlers).
 - Backend: NestJS (TypeScript), API REST.
-- Base de datos: MongoDB instalado en local (Homebrew) + Mongoose (@nestjs/mongoose).
+- Base de datos: MongoDB 8.0 en local, descargado en ~/mongodb (sin Homebrew ni permisos de
+  administrador; se arranca con `npm run db` en /backend) + Mongoose (@nestjs/mongoose).
 
 ## Fases (en este orden, sin adelantar piezas de fases posteriores)
 - Fase 1 — Frontend solo: formulario + listado con CRUD. Los datos se guardan en
@@ -55,5 +56,5 @@ GET /products · GET /products/:id · POST /products · PATCH /products/:id · D
 5. Tómate el tiempo necesario; prioriza claridad sobre velocidad.
 6. Al terminar cada paso, di qué se hizo y cómo comprobarlo.
 7. Solo tengo Node instalado: guíame en cada instalación cuando llegue su fase
-   (Nest CLI en Fase 2; Homebrew y MongoDB en Fase 3).
+   (Nest CLI vía npx en Fase 2; MongoDB descargado en ~/mongodb en Fase 3).
 8. Respuestas directas y estructuradas (listas, tablas). Sin explicaciones teóricas largas.

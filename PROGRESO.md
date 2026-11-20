@@ -2,9 +2,10 @@
 
 ## Estado actual
 - **Fase 1** (frontend + localStorage): ✅ completada. Versión guardada en el commit `05dab7b`
-- **Fase 2** (backend NestJS en memoria): ✅ completada (20/11/2026). Pendiente: prueba manual en navegador y commit
-- **Siguiente:** Fase 3 (MongoDB + Mongoose), pendiente de aprobación para empezar
-- **Git/GitHub:** repo https://github.com/CrisGoPa/DEL_PRUEBACIFOUI01 (rama `main`). Último commit subido: `05dab7b Fase 1 completa: CRUD con localStorage`. Cambios de la Fase 2 sin commit
+- **Fase 2** (backend NestJS en memoria): ✅ completada (20/11/2026). Versión guardada en el commit `ed538ec`. Pendiente: prueba manual en navegador
+- **Fase 3** (MongoDB + Mongoose): ✅ completada (20/11/2026). Pendiente: prueba manual en navegador y commit
+- **Siguiente:** proyecto completo (3 fases). Pendiente revisar los avisos de `npm audit`
+- **Git/GitHub:** repo https://github.com/CrisGoPa/DEL_PRUEBACIFOUI01 (rama `main`). Último commit subido: `ed538ec Fase 2 completa: backend NestJS en memoria + fetch`
 
 ## Plan Fase 1
 | # | Paso | Estado | Cómo se comprueba |
@@ -30,6 +31,19 @@
 | 7 | CORS en `main.ts` (`app.enableCors()`) | ✅ | Cabecera `Access-Control-Allow-Origin: *` + preflight PATCH OK |
 | 8 | Frontend: localStorage → `fetch` contra la API | ✅ | `llamarApi` del frontend ejecutada contra el servidor (11 pruebas OK) |
 | 9 | Repaso final | ✅ | Tests (`npm test`) y lint OK; falta prueba manual en navegador |
+
+## Plan Fase 3
+| # | Paso | Estado | Cómo se comprueba |
+|---|---|---|---|
+| 1 | Descargar MongoDB 8.0.38 (macOS arm64) de fastdl.mongodb.org, verificar SHA-256, descomprimir en `~/mongodb` | ✅ | `~/mongodb/bin/mongod --version` |
+| 2 | Carpeta de datos `~/mongodb/data` | ✅ | — |
+| 3 | Script `npm run db` en `backend/package.json` | ✅ | "Waiting for connections" en el puerto 27017 |
+| 4 | `npm install @nestjs/mongoose mongoose` (Mongoose 9.12.2) | ✅ | Compila |
+| 5 | Conexión `mongodb://localhost:27017/catalogo` en `app.module.ts` | ✅ | El servidor arranca sin errores |
+| 6 | Esquema `product.schema.ts` con `timestamps` y salida `id` (sin `_id` ni `__v`) | ✅ | Respuestas JSON |
+| 7 | Servicio con el modelo de Mongoose (async); id inválido o inexistente → 404 | ✅ | curl (18 pruebas OK) |
+| 8 | Frontend sin cambios | ✅ | 0 líneas cambiadas; `llamarApi` contra el servidor (9 pruebas OK) |
+| 9 | Repaso: persistencia tras reiniciar, tests, lint, CLAUDE.md, PROGRESO.md | ✅ | Falta prueba manual en navegador |
 
 ## Registro de sesiones
 ### 19/11/2026
@@ -72,6 +86,23 @@
   - Si el servidor está apagado, la tabla muestra "No se puede conectar con el servidor. ¿Está arrancado?".
   - Errores de validación del servidor se muestran con `alert()`.
 - Paso 9: prueba del frontend ejecutando su `llamarApi` real contra el servidor (11 comprobaciones OK, incluida la del servidor apagado); `npm test` y `npm run lint` OK. `jsdom` volvió a bloquearse, así que la interfaz (DOM) no se probó de forma automática.
+- Commit `ed538ec Fase 2 completa: backend NestJS en memoria + fetch` (25 archivos, sin `node_modules` ni `dist`) → push hecho.
+
+### 20/11/2026 — Fase 3
+- No había Homebrew ni MongoDB. Cristina pidió otra forma de instalar (sin Homebrew/admin). Opciones valoradas: descarga directa (elegida), Docker (requiere admin), Atlas (no local), mongodb-memory-server (no persistente).
+- MongoDB 8.0.38 descargado y verificado (SHA-256 oficial) en `~/mongodb`; datos en `~/mongodb/data`. Se arranca con `npm run db` (en `backend`).
+- `mongosh` no se descarga: si hace falta, `npx mongosh`.
+- Instalados `@nestjs/mongoose` 12 y `mongoose` 9.12.2. `npm audit` muestra avisos de vulnerabilidades en dependencias: pendiente de revisar.
+- Archivos nuevos/cambiados en `backend/src`:
+  - `products/product.schema.ts` (nuevo): campos con `required`, `min`, `enum`, `default`, `trim`; `timestamps`; `toJSON` devuelve `id`.
+  - `products/products.service.ts`: usa `Model<Product>` (`find`, `findById`, `create`, `findByIdAndUpdate`, `findByIdAndDelete`); `isValidObjectId` → 404 si el id no vale.
+  - `products/products.module.ts`: `MongooseModule.forFeature`.
+  - `app.module.ts`: `MongooseModule.forRoot(...)`.
+  - `products/products.controller.ts`: `remove` ahora es `async` (para que el 404 llegue).
+- Los DTOs y la validación de la Fase 2 se mantienen (validan antes de llegar a Mongo).
+- Pruebas: 18 de API (CRUD, `createdAt`/`updatedAt`, errores 400/404, CORS, **persistencia tras reiniciar**) + 9 del frontend sin cambios → todas OK. `npm test` y lint OK.
+- Base de datos dejada vacía y MongoDB parado al terminar.
+- CLAUDE.md actualizado: MongoDB en `~/mongodb` en lugar de Homebrew.
 
 ## Decisiones
 | Fecha | Decisión | Motivo |
@@ -109,25 +140,35 @@
 | 20/11 | Ver/Editar/Borrar consultan `GET /products/:id` | Usa el endpoint y siempre muestra datos actuales |
 | 20/11 | Se mantiene el ejemplo `AppController` ("Hello World!") | Sirve para comprobar que el servidor está vivo |
 | 20/11 | Puerto 3000; frontend con doble clic (`file://`) | Por defecto; con CORS abierto funciona |
+| 20/11 | MongoDB por descarga directa en `~/mongodb` (no Homebrew) | Sin permisos de administrador |
+| 20/11 | MongoDB 8.0.38 (no 9.0) | Compatibilidad probada con Mongoose |
+| 20/11 | Arranque manual con `npm run db` (no servicio) | Sin Homebrew no hay `brew services`; además se ve que la BD es otro programa |
+| 20/11 | Base de datos `catalogo` | Recomendación aceptada |
+| 20/11 | `createdAt`/`updatedAt` solo en la API, el frontend no los muestra | "El frontend no debería cambiar" |
+| 20/11 | Devolver `id` (no `_id`) con `toJSON` en el esquema | El frontend sigue igual |
+| 20/11 | Mantener DTOs + validación del esquema | Doble red: errores claros en la API y datos seguros en la BD |
+| 20/11 | URL de Mongo con `process.env.MONGODB_URI` y valor por defecto local | Igual que `PORT`; no requiere configurar nada |
 
 ## Pendientes / notas
-- **Probar la Fase 2 en el navegador** (ver "Cómo probar").
-- **Commit de la Fase 2** cuando Cristina lo pida (`.gitignore`, `PROGRESO.md`, `frontend/app.js`, `backend/`).
-- Los datos de la Fase 2 se pierden al reiniciar el servidor (es lo esperado: array en memoria). Los productos guardados en localStorage en la Fase 1 ya no se usan.
-- Fase 3: hará falta Homebrew + MongoDB (guiar la instalación) y `@nestjs/mongoose`. Mongo usa `_id`: habrá que devolver `id` para que el frontend no cambie.
+- **Probar la Fase 3 en el navegador** (ver "Cómo probar").
+- **Commit de la Fase 3** cuando Cristina lo pida.
+- Revisar los avisos de `npm audit` en `backend`.
+- MongoDB vive fuera del proyecto (`~/mongodb`), no va a Git. En otro ordenador habría que repetir la descarga.
+- Los productos guardados en localStorage en la Fase 1 ya no se usan.
 - Las pruebas automáticas de interfaz con `jsdom` se bloquean; para probar sin navegador se usa Node + curl.
 - Python no está disponible en el sistema; para scripts se usa Node.
 - Nunca pegar el token de GitHub en el chat. Al caducar, crear uno nuevo y guardarlo en el Llavero.
 
 ## Cómo probar
-### Fase 2 (actual)
-1. Arrancar el backend: `cd backend` → `npm run start:dev` (se queda escuchando en http://localhost:3000; se para con Ctrl+C).
-2. Comprobar la API: abrir http://localhost:3000/products → `[]`.
-3. Abrir `frontend/index.html` con doble clic.
-4. Checklist:
+### Fase 3 (actual): 2 Terminales
+1. **Terminal 1, base de datos:** `cd backend` → `npm run db` (déjala abierta; se para con Ctrl+C).
+2. **Terminal 2, API:** `cd backend` → `npm run start:dev` (déjala abierta; se para con Ctrl+C).
+3. Comprobar la API: abrir http://localhost:3000/products → `[]`.
+4. Abrir `frontend/index.html` con doble clic.
+5. Checklist:
    - Crear 2–3 productos (uno sin stock ni descripción) → aparecen en la tabla.
-   - Recargar la página → siguen (vienen del servidor).
-   - Ver / Editar / Editar + Cancelar / Borrar (Cancelar y Aceptar) → igual que en la Fase 1.
-   - Parar el servidor (Ctrl+C) y recargar → "No se puede conectar con el servidor".
-   - Volver a arrancarlo → lista vacía (datos en memoria).
-- Probar la API a mano: `curl localhost:3000/products`, o en el navegador.
+   - Ver / Editar / Editar + Cancelar / Borrar (Cancelar y Aceptar) → igual que antes.
+   - Parar la API (Ctrl+C en la Terminal 2) y recargar → "No se puede conectar con el servidor".
+   - Volver a arrancar la API → **los productos siguen** (están en MongoDB).
+   - En http://localhost:3000/products se ven `createdAt` y `updatedAt`.
+- Ver la base de datos por dentro (opcional): `npx mongosh catalogo` → `db.products.find()`.
