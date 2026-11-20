@@ -1,0 +1,67 @@
+/* Base */
+body {
+  font-family: system-ui, sans-serif;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 16px;
+  background: #f5f5f5;
+  color: #222;
+}
+
+/* Formulario: un campo por fila */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+label {
+  display: flex;
+  flex-direction: column;
+  font-weight: bold;
+  gap: 4px;
+}
+input, select, textarea {
+  padding: 8px;
+  font: inherit;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Botones */
+button {
+  padding: 8px 14px;
+  font: inherit;
+  border: none;
+  border-radius: 4px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+button:hover { background: #1d4ed8; }
+#btn-cancelar { background: #6b7280; }
+
+/* Tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+th, td {
+  padding: 8px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+th { background: #e5e7eb; }
+
+/* Panel de detalle */
+#detalle {
+  margin-top: 24px;
+  background: #fff;
+  padding: 16px;
+  border-radius: 8px;
+}
+#detalle:empty { display: none; } /* oculto mientras no tenga contenido */
