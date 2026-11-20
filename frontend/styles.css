@@ -44,6 +44,20 @@ button {
 button:hover { background: #1d4ed8; }
 #btn-cancelar { background: #6b7280; }
 
+/* Barra de búsqueda y filtros: en una fila */
+#filtros {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+#buscar { flex: 1; } /* el buscador ocupa el espacio sobrante */
+#btn-limpiar { background: #6b7280; }
+
+/* En pantallas estrechas (móvil), uno debajo de otro */
+@media (max-width: 600px) {
+  #filtros { flex-direction: column; }
+}
+
 /* Tabla */
 table {
   width: 100%;

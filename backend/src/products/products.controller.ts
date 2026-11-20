@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
 import { ProductsService } from './products.service.js';
 import { CreateProductDto } from './dto/create-product.dto.js';
 import { UpdateProductDto } from './dto/update-product.dto.js';
@@ -10,9 +10,10 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   // GET /products → lista todos
+  // Filtros opcionales en la URL: /products?buscar=mac&categoria=portátil
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  findAll(@Query('buscar') buscar?: string, @Query('categoria') categoria?: string) {
+    return this.productsService.findAll(buscar, categoria);
   }
 
   // GET /products/:id → uno concreto

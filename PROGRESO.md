@@ -4,7 +4,8 @@
 - **Fase 1** (frontend + localStorage): ✅ completada. Versión guardada en el commit `05dab7b`
 - **Fase 2** (backend NestJS en memoria): ✅ completada (20/11/2026). Versión guardada en el commit `ed538ec`. Pendiente: prueba manual en navegador
 - **Fase 3** (MongoDB + Mongoose): ✅ completada (20/11/2026). Versión guardada en el commit `cb06eaf` (push hecho). Pendiente: prueba manual en navegador
-- **Siguiente:** Fase 4, por definir (no está en el CLAUDE.md)
+- **Fase 4** (búsqueda y filtros): ✅ completada (20/11/2026). Pendiente: prueba manual en navegador y commit
+- **Siguiente:** por definir
 - **Git/GitHub:** repo https://github.com/CrisGoPa/DEL_PRUEBACIFOUI01 (rama `main`). Último commit subido: `cb06eaf Fase 3 completa: MongoDB con Mongoose`
 
 ## Plan Fase 1
@@ -44,6 +45,17 @@
 | 7 | Servicio con el modelo de Mongoose (async); id inválido o inexistente → 404 | ✅ | curl (18 pruebas OK) |
 | 8 | Frontend sin cambios | ✅ | 0 líneas cambiadas; `llamarApi` contra el servidor (9 pruebas OK) |
 | 9 | Repaso: persistencia tras reiniciar, tests, lint, CLAUDE.md, PROGRESO.md | ✅ | Falta prueba manual en navegador |
+
+## Plan Fase 4
+| # | Paso | Estado | Cómo se comprueba |
+|---|---|---|---|
+| 1 | CLAUDE.md: Fase 4 + filtros del endpoint | ✅ | Leerlo |
+| 2 | Backend: `@Query('buscar')`, `@Query('categoria')`; filtro Mongo (`$or` nombre/marca con RegExp escapada, `i`); categoría inválida → 400 | ✅ | Compila |
+| 3 | Pruebas de API con curl | ✅ | 13 pruebas OK |
+| 4 | `index.html`: barra `#filtros` (buscador, desplegable "Todas" + 5, Limpiar) | ✅ | Se ve encima de la tabla |
+| 5 | `styles.css`: barra en fila; en < 600px en columna | ✅ | Visual |
+| 6 | `app.js`: `pintarLista()` envía `?buscar=&categoria=`; filtra al escribir; mensaje "Ningún producto coincide con la búsqueda" | ✅ | 11 pruebas OK |
+| 7 | Repaso + PROGRESO.md | ✅ | Tests y lint OK; falta prueba manual |
 
 ## Registro de sesiones
 ### 19/11/2026
@@ -105,6 +117,21 @@
 - Base de datos dejada vacía y MongoDB parado al terminar.
 - CLAUDE.md actualizado: MongoDB en `~/mongodb` en lugar de Homebrew.
 
+### 20/11/2026 — Fase 4 (búsqueda y filtros)
+- Cristina elige la opción A de las propuestas (A búsqueda/filtros, B interfaz, C servir frontend desde Nest, D autenticación, E despliegue).
+- CLAUDE.md: añadida la Fase 4 y `GET /products?buscar=texto&categoria=móvil`.
+- Backend: `products.controller.ts` (`@Query`) y `products.service.ts` (`findAll(buscar, categoria)` con `QueryFilter<Product>`).
+  - Texto: se recorta, se escapan caracteres especiales de RegExp y se busca en nombre O marca sin distinguir mayúsculas.
+  - Categoría: si no es una de las 5 → 400. Vacía = sin filtro.
+  - Parámetro repetido (`?buscar=a&buscar=b`) se ignora en lugar de dar error 500.
+- Pruebas API (13): cada filtro, combinados, mayúsculas, sin resultados, `(`, `.`, espacios, vacíos, inválida, repetido → OK.
+- Frontend: barra `#filtros` en `index.html`, estilos en `styles.css`, y en `app.js`:
+  - `pintarLista()` construye la consulta con `URLSearchParams` (codifica bien los acentos).
+  - Escuchadores: `input` en el buscador, `change` en el desplegable, botón Limpiar.
+  - `ultimaPeticion`: ignora respuestas antiguas si se escribe rápido.
+  - Crear/editar/borrar siguen repintando con los filtros activos.
+- Pruebas frontend (11) contra la API → OK. `npm test` y lint OK. Base de datos vacía y servidores parados al terminar.
+
 ## Decisiones
 | Fecha | Decisión | Motivo |
 |---|---|---|
@@ -150,6 +177,12 @@
 | 20/11 | Mantener DTOs + validación del esquema | Doble red: errores claros en la API y datos seguros en la BD |
 | 20/11 | URL de Mongo con `process.env.MONGODB_URI` y valor por defecto local | Igual que `PORT`; no requiere configurar nada |
 | 20/11 | No tocar los avisos de `npm audit` (vienen de `@nestjs/mau`, no usado) | Entorno de clase; sin riesgo real |
+| 20/11 | Fase 4 = búsqueda y filtros | Elección de Cristina |
+| 20/11 | Buscar en nombre y marca, sin distinguir mayúsculas | Recomendación aceptada |
+| 20/11 | Filtrar mientras se escribe (sin botón Buscar) + botón Limpiar | Más cómodo; servidor local rápido |
+| 20/11 | Filtrar en el servidor (query params), no en el navegador | Practicar query params y filtros de MongoDB |
+| 20/11 | Sin rango de precio ni ordenación por ahora | Fase pequeña |
+| 20/11 | Búsqueda sensible a acentos ("portatil" ≠ "portátil") | Aceptado: resolverlo complica la consulta |
 
 ## Pendientes / notas
 - **Probar la Fase 3 en el navegador** (ver "Cómo probar").
@@ -171,4 +204,6 @@
    - Parar la API (Ctrl+C en la Terminal 2) y recargar → "No se puede conectar con el servidor".
    - Volver a arrancar la API → **los productos siguen** (están en MongoDB).
    - En http://localhost:3000/products se ven `createdAt` y `updatedAt`.
+   - **Fase 4:** escribir en el buscador (p. ej. "apple") → la tabla se filtra al teclear; elegir categoría → se combina; texto sin coincidencias → "Ningún producto coincide con la búsqueda"; Limpiar → vuelven todos.
+   - Probar filtros en la API: http://localhost:3000/products?buscar=apple&categoria=móvil
 - Ver la base de datos por dentro (opcional): `npx mongosh catalogo` → `db.products.find()`.

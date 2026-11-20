@@ -29,6 +29,9 @@ Código simple, legible y sin abstracciones innecesarias.
   servidor. El frontend pasa a usar fetch contra la API (configurar CORS).
 - Fase 3 — Añadir MongoDB: sustituir el array del servidor por MongoDB con Mongoose.
   El frontend no debería cambiar.
+- Fase 4 — Búsqueda y filtros: buscar por texto (nombre o marca, sin distinguir
+  mayúsculas) y filtrar por categoría, en la API (query params) y en el frontend
+  (buscador + desplegable encima de la tabla, filtra mientras se escribe).
 
 ## Modelo Producto
 - nombre (string, obligatorio)
@@ -46,6 +49,7 @@ PROGRESO.md -> registro de pasos, decisiones y estado actual (mantener al día)
 
 ## Endpoints (Fase 2 en adelante)
 GET /products · GET /products/:id · POST /products · PATCH /products/:id · DELETE /products/:id
+Filtros opcionales (Fase 4): GET /products?buscar=texto&categoria=móvil
 
 ## Forma de trabajar (OBLIGATORIO)
 1. Antes de cualquier acción (instalar, crear archivos, escribir código, ejecutar comandos),

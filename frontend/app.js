@@ -6,6 +6,11 @@ const lista = document.getElementById('lista-productos');
 const form = document.getElementById('form-producto');
 const detalle = document.getElementById('detalle');
 const botonGuardar = form.querySelector('button[type="submit"]');
+const buscador = document.getElementById('buscar');
+const filtroCategoria = document.getElementById('filtro-categoria');
+
+// Número de la última petición del listado (para ignorar respuestas antiguas al escribir rápido)
+let ultimaPeticion = 0;
 
 // id del producto que se está editando (null = estamos creando)
 let idEditando = null;
@@ -29,18 +34,31 @@ async function llamarApi(ruta = '', opciones = {}) {
   return respuesta.status === 204 ? null : respuesta.json();
 }
 
-// Pinta la tabla con los productos del servidor
+// Pinta la tabla con los productos del servidor (aplicando la búsqueda y el filtro)
 async function pintarLista() {
+  // Filtros como parámetros de la URL: ?buscar=...&categoria=...
+  const parametros = new URLSearchParams();
+  const texto = buscador.value.trim();
+  if (texto) parametros.set('buscar', texto);
+  if (filtroCategoria.value) parametros.set('categoria', filtroCategoria.value);
+  const consulta = parametros.toString() ? '?' + parametros : '';
+
+  const estaPeticion = ++ultimaPeticion;
+
   let productos;
   try {
-    productos = await llamarApi(); // GET /products
+    productos = await llamarApi(consulta); // GET /products?...
   } catch (error) {
     lista.innerHTML = '<tr><td colspan="6">No se puede conectar con el servidor. ¿Está arrancado?</td></tr>';
     return;
   }
 
+  // Si mientras esperábamos se lanzó otra búsqueda, esta respuesta ya no sirve
+  if (estaPeticion !== ultimaPeticion) return;
+
   if (productos.length === 0) {
-    lista.innerHTML = '<tr><td colspan="6">No hay productos</td></tr>';
+    const mensaje = consulta ? 'Ningún producto coincide con la búsqueda' : 'No hay productos';
+    lista.innerHTML = `<tr><td colspan="6">${mensaje}</td></tr>`;
     return;
   }
 
@@ -206,6 +224,17 @@ lista.addEventListener('click', evento => {
   if (boton.dataset.accion === 'ver') mostrarDetalle(id);
   if (boton.dataset.accion === 'editar') empezarEdicion(id);
   if (boton.dataset.accion === 'borrar') borrarProducto(id);
+});
+
+// Búsqueda y filtro: repintamos la tabla al escribir o al cambiar la categoría
+buscador.addEventListener('input', pintarLista);
+filtroCategoria.addEventListener('change', pintarLista);
+
+// Botón Limpiar: quita la búsqueda y el filtro
+document.getElementById('btn-limpiar').addEventListener('click', () => {
+  buscador.value = '';
+  filtroCategoria.value = '';
+  pintarLista();
 });
 
 // Al cargar la página, pintamos el listado
