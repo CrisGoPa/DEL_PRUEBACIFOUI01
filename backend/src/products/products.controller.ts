@@ -1,0 +1,42 @@
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post } from '@nestjs/common';
+import { ProductsService } from './products.service.js';
+import { CreateProductDto } from './dto/create-product.dto.js';
+import { UpdateProductDto } from './dto/update-product.dto.js';
+
+// Todas las rutas de este controlador empiezan por /products
+@Controller('products')
+export class ProductsController {
+  // Nest nos "inyecta" el servicio, que es quien guarda los datos
+  constructor(private readonly productsService: ProductsService) {}
+
+  // GET /products → lista todos
+  @Get()
+  findAll() {
+    return this.productsService.findAll();
+  }
+
+  // GET /products/:id → uno concreto
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.productsService.findOne(id);
+  }
+
+  // POST /products → crea (el cuerpo se valida con CreateProductDto)
+  @Post()
+  create(@Body() datos: CreateProductDto) {
+    return this.productsService.create(datos);
+  }
+
+  // PATCH /products/:id → edita los campos enviados
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() datos: UpdateProductDto) {
+    return this.productsService.update(id, datos);
+  }
+
+  // DELETE /products/:id → borra (responde 204: sin contenido)
+  @Delete(':id')
+  @HttpCode(204)
+  remove(@Param('id') id: string) {
+    this.productsService.remove(id);
+  }
+}

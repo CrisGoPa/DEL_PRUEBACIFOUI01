@@ -1,5 +1,5 @@
-// Clave con la que guardamos los productos en localStorage
-const CLAVE = 'productos';
+// Dirección de la API (backend NestJS)
+const API = 'http://localhost:3000/products';
 
 // Referencias a elementos del HTML
 const lista = document.getElementById('lista-productos');
@@ -10,20 +10,34 @@ const botonGuardar = form.querySelector('button[type="submit"]');
 // id del producto que se está editando (null = estamos creando)
 let idEditando = null;
 
-// Lee los productos de localStorage (array vacío si no hay nada)
-function leerProductos() {
-  const datos = localStorage.getItem(CLAVE);
-  return datos ? JSON.parse(datos) : [];
+// Llama a la API y devuelve el JSON de la respuesta.
+// Si el servidor responde con error, lanza un Error con su mensaje.
+async function llamarApi(ruta = '', opciones = {}) {
+  const respuesta = await fetch(API + ruta, {
+    headers: { 'Content-Type': 'application/json' },
+    ...opciones
+  });
+
+  if (!respuesta.ok) {
+    const error = await respuesta.json().catch(() => ({})); // por si no viene JSON
+    // Nest devuelve "message" como texto o como lista de textos
+    const mensaje = [].concat(error.message || respuesta.statusText).join('\n');
+    throw new Error(mensaje);
+  }
+
+  // 204 = sin contenido (DELETE): no hay JSON que leer
+  return respuesta.status === 204 ? null : respuesta.json();
 }
 
-// Guarda el array de productos en localStorage
-function guardarProductos(productos) {
-  localStorage.setItem(CLAVE, JSON.stringify(productos));
-}
-
-// Pinta la tabla con los productos guardados
-function pintarLista() {
-  const productos = leerProductos();
+// Pinta la tabla con los productos del servidor
+async function pintarLista() {
+  let productos;
+  try {
+    productos = await llamarApi(); // GET /products
+  } catch (error) {
+    lista.innerHTML = '<tr><td colspan="6">No se puede conectar con el servidor. ¿Está arrancado?</td></tr>';
+    return;
+  }
 
   if (productos.length === 0) {
     lista.innerHTML = '<tr><td colspan="6">No hay productos</td></tr>';
@@ -53,8 +67,8 @@ function pintarLista() {
   });
 }
 
-// Al enviar el formulario: validar, crear o editar el producto y guardarlo
-form.addEventListener('submit', evento => {
+// Al enviar el formulario: validar, crear o editar el producto en el servidor
+form.addEventListener('submit', async evento => {
   evento.preventDefault(); // evita que la página se recargue
 
   const nombre = document.getElementById('nombre').value.trim();
@@ -77,19 +91,18 @@ form.addEventListener('submit', evento => {
     descripcion: document.getElementById('descripcion').value.trim()
   };
 
-  const productos = leerProductos();
-
-  if (idEditando) {
-    // Editar: sustituimos el producto conservando su id
-    // ({ id, ...datos } = un objeto con el id + todos los campos de "datos")
-    const i = productos.findIndex(p => p.id === idEditando);
-    productos[i] = { id: idEditando, ...datos };
-  } else {
-    // Crear: producto nuevo con id propio
-    productos.push({ id: Date.now().toString(), ...datos });
+  try {
+    if (idEditando) {
+      // Editar: PATCH /products/:id
+      await llamarApi('/' + idEditando, { method: 'PATCH', body: JSON.stringify(datos) });
+    } else {
+      // Crear: POST /products (el id lo genera el servidor)
+      await llamarApi('', { method: 'POST', body: JSON.stringify(datos) });
+    }
+  } catch (error) {
+    alert('No se pudo guardar:\n' + error.message);
+    return;
   }
-
-  guardarProductos(productos);
 
   detalle.innerHTML = ''; // cierra el detalle por si mostraba datos antiguos
   salirDeEdicion();       // limpia el formulario y vuelve a modo "crear"
@@ -100,9 +113,14 @@ form.addEventListener('submit', evento => {
 document.getElementById('btn-cancelar').addEventListener('click', salirDeEdicion);
 
 // Muestra los datos de un producto en el panel de detalle
-function mostrarDetalle(id) {
-  const p = leerProductos().find(prod => prod.id === id);
-  if (!p) return;
+async function mostrarDetalle(id) {
+  let p;
+  try {
+    p = await llamarApi('/' + id); // GET /products/:id
+  } catch (error) {
+    alert(error.message);
+    return;
+  }
 
   detalle.innerHTML = '';
 
@@ -132,9 +150,14 @@ function mostrarDetalle(id) {
 }
 
 // Rellena el formulario con un producto y pasa a modo edición
-function empezarEdicion(id) {
-  const p = leerProductos().find(prod => prod.id === id);
-  if (!p) return;
+async function empezarEdicion(id) {
+  let p;
+  try {
+    p = await llamarApi('/' + id); // GET /products/:id
+  } catch (error) {
+    alert(error.message);
+    return;
+  }
 
   document.getElementById('nombre').value = p.nombre;
   document.getElementById('marca').value = p.marca;
@@ -156,15 +179,16 @@ function salirDeEdicion() {
 }
 
 // Borra un producto tras pedir confirmación
-function borrarProducto(id) {
-  const productos = leerProductos();
-  const p = productos.find(prod => prod.id === id);
-  if (!p) return;
+async function borrarProducto(id) {
+  try {
+    const p = await llamarApi('/' + id); // para mostrar el nombre en la pregunta
+    if (!confirm(`¿Borrar "${p.nombre}"?`)) return; // si cancela, no hacemos nada
 
-  if (!confirm(`¿Borrar "${p.nombre}"?`)) return; // si cancela, no hacemos nada
-
-  // filter crea un array nuevo sin el producto con ese id
-  guardarProductos(productos.filter(prod => prod.id !== id));
+    await llamarApi('/' + id, { method: 'DELETE' }); // DELETE /products/:id
+  } catch (error) {
+    alert('No se pudo borrar:\n' + error.message);
+    return;
+  }
 
   // Si se estaba editando ese producto, salimos del modo edición
   if (idEditando === id) salirDeEdicion();

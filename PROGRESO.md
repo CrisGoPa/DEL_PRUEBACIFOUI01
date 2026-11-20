@@ -1,30 +1,10 @@
 # PROGRESO — Catálogo de productos tecnológicos
 
 ## Estado actual
-- **Fase:** 1 (frontend + localStorage) ✅ **completada** (20/11/2026)
-- **Último paso hecho:** Fase 1 · paso 8 (cierre de fase)
-- **Siguiente:** Fase 2 · paso 1 (instalar/usar Nest CLI). Plan propuesto abajo, pendiente de respuestas de Cristina
-
-## Plan Fase 2 (propuesto, pendiente de aprobación)
-| # | Paso | Estado | Cómo se comprueba |
-|---|---|---|---|
-| 1 | Nest CLI vía `npx @nestjs/cli` (sin instalación global ni sudo) | ⏳ | `npx @nestjs/cli --version` |
-| 2 | Crear proyecto: `npx @nestjs/cli new backend --skip-git --package-manager npm` (`--skip-git` porque el repo ya está en la raíz) | ⏳ | `npm run start:dev` → http://localhost:3000 muestra "Hello World!" |
-| 3 | Generar módulo, controlador y servicio `products` (sin tests: `--no-spec`) | ⏳ | El servidor arranca sin errores |
-| 4 | Servicio con array en memoria + CRUD; id generado por el servidor | ⏳ | — |
-| 5 | Controlador con los 5 endpoints del CLAUDE.md | ⏳ | `curl` a cada endpoint |
-| 6 | Validación de datos en el servidor (precio ≥ 0, obligatorios, categoría válida) | ⏳ | POST con datos malos → error 400 |
-| 7 | CORS en `main.ts` (`app.enableCors()`) | ⏳ | El frontend puede llamar a la API |
-| 8 | Frontend: cambiar localStorage por `fetch` contra `http://localhost:3000/products` | ⏳ | CRUD en el navegador; los datos viven en el servidor |
-| 9 | Repaso final Fase 2 | ⏳ | Checklist |
-
-### Preguntas abiertas Fase 2
-1. Nest CLI: ¿`npx` (recomendado, no instala nada global) o `npm install -g @nestjs/cli`?
-2. Validación en el servidor: ¿`class-validator` + `ValidationPipe` (lo estándar en Nest, 2 paquetes más) o comprobaciones a mano en el servicio?
-3. id: ¿texto con `crypto.randomUUID()` (recomendado: en Fase 3 Mongo también usa ids de texto) o número incremental?
-4. Puerto: ¿3000 (por defecto)?
-5. Frontend: ¿seguimos abriéndolo con doble clic (`file://`)? Con CORS abierto funciona.
-- **Git/GitHub:** configurado. Repo https://github.com/CrisGoPa/DEL_PRUEBACIFOUI01 (rama `main`). Último commit subido: `489069c Fase1`
+- **Fase 1** (frontend + localStorage): ✅ completada. Versión guardada en el commit `05dab7b`
+- **Fase 2** (backend NestJS en memoria): ✅ completada (20/11/2026). Pendiente: prueba manual en navegador y commit
+- **Siguiente:** Fase 3 (MongoDB + Mongoose), pendiente de aprobación para empezar
+- **Git/GitHub:** repo https://github.com/CrisGoPa/DEL_PRUEBACIFOUI01 (rama `main`). Último commit subido: `05dab7b Fase 1 completa: CRUD con localStorage`. Cambios de la Fase 2 sin commit
 
 ## Plan Fase 1
 | # | Paso | Estado | Cómo se comprueba |
@@ -36,44 +16,69 @@
 | 5 | Ver detalle (panel `#detalle`) | ✅ | Pulsar "Ver" |
 | 6 | Editar (mismo formulario) | ✅ | Cambiar precio, recargar y se mantiene |
 | 7 | Borrar con confirmación | ✅ | Borrar, recargar y no vuelve |
-| 8 | Repaso final del CRUD | ✅ | Lista de comprobación |
+| 8 | Repaso final del CRUD | ✅ | Revisión de código (la prueba en navegador no se registró) |
+
+## Plan Fase 2
+| # | Paso | Estado | Cómo se comprueba |
+|---|---|---|---|
+| 1 | Nest CLI vía `npx @nestjs/cli` (sin instalación global) | ✅ | `npx @nestjs/cli --version` → 12.0.15 |
+| 2 | Crear proyecto `backend` (`--skip-git --package-manager npm`) + limpieza (ver registro) | ✅ | `GET /` → "Hello World!" |
+| 3 | Generar módulo, controlador y servicio `products` (`--no-spec`) | ✅ | Compila (`npm run build`) |
+| 4 | Servicio con array en memoria + CRUD; id `randomUUID()` | ✅ | curl |
+| 5 | Controlador con los 5 endpoints | ✅ | curl (19 pruebas OK) |
+| 6 | Validación con DTOs (`class-validator`) + `ValidationPipe` | ✅ | Datos malos → 400 con mensaje |
+| 7 | CORS en `main.ts` (`app.enableCors()`) | ✅ | Cabecera `Access-Control-Allow-Origin: *` + preflight PATCH OK |
+| 8 | Frontend: localStorage → `fetch` contra la API | ✅ | `llamarApi` del frontend ejecutada contra el servidor (11 pruebas OK) |
+| 9 | Repaso final | ✅ | Tests (`npm test`) y lint OK; falta prueba manual en navegador |
 
 ## Registro de sesiones
 ### 19/11/2026
 - Propuesta del plan de la Fase 1 (8 pasos) y decisiones (ver tabla).
-- Pasos 1, 2 y 3 hechos.
-- Paso 4 propuesto, pero no llegó a aprobarse.
+- Pasos 1, 2 y 3 hechos. Paso 4 propuesto, pero no llegó a aprobarse.
 
-### 20/11/2026
-- Revisión del estado real: la Fase 1 está a medias (3 de 8).
+### 20/11/2026 — Git y GitHub
+- Revisión del estado real: la Fase 1 estaba a medias (3 de 8).
 - Instaladas las Command Line Tools de Apple → Git 2.39.5.
 - Git configurado: nombre `Cristina`, email `cpgonell@gmail.com`, credenciales en el Llavero (`osxkeychain`).
 - CLAUDE.md actualizado: reglas de Git/GitHub y referencia a este archivo.
-- Creado este `PROGRESO.md`.
-- Creado `.gitignore` (`.DS_Store`) y `git init -b main`.
-- Comprobado que el repo de GitHub estaba vacío.
-- Commit `489069c Fase1` (6 archivos: `.gitignore`, `CLAUDE.md`, `PROGRESO.md`, `frontend/*`).
-- Remoto `origin` añadido; token fine-grained `actividad01-mac` guardado en el Llavero.
-- Primer push a `origin/main` hecho.
+- Creado este `PROGRESO.md`, `.gitignore` y `git init -b main`.
+- Commit `489069c Fase1` + remoto `origin` + token fine-grained `actividad01-mac` en el Llavero + primer push.
 - Nota: el token se pegó en el chat; Cristina decidió no regenerarlo (entorno de clase).
-- Fase 1 · paso 4 hecho: `app.js` con el envío del formulario (validación, crear producto, guardar en localStorage, repintar) y botón Cancelar (`form.reset()`).
-- Fase 1 · paso 5 hecho: `mostrarDetalle(id)` rellena `#detalle` (con botón Cerrar) y un único escuchador de clics en la tabla (delegación de eventos).
-- Fase 1 · paso 6 hecho: variable `idEditando`, funciones `empezarEdicion(id)` y `salirDeEdicion()`; el submit crea o sustituye según `idEditando`; Cancelar sale del modo edición.
-- Fase 1 · paso 7 hecho: `borrarProducto(id)` con `confirm()`, `filter` para quitarlo; sale de edición y cierra el detalle si afectaba a ese producto.
-- Fase 1 · paso 8 (durante la pausa, a petición de Cristina: "asegúrate de que esté cerrada"):
-  - Revisión completa de `app.js`: flujos crear/ver/editar/cancelar/borrar coherentes, sin errores encontrados. Sintaxis OK (`node --check`).
-  - Limpiados los 3 comentarios desfasados (`index.html` y `app.js`); ya no hay referencias a "paso N".
-  - Intento de prueba automática con `jsdom`: **bloqueado** (no se permite instalar paquetes sin Cristina presente).
-  - Pendiente: pasar la checklist de pruebas en el navegador (ver abajo).
-  - **Fase 1 completada** (código cerrado; falta solo la prueba manual).
-- Fase 2: no se ha empezado. Plan y preguntas preparados (ver "Plan Fase 2").
+
+### 20/11/2026 — Fase 1 (pasos 4–8)
+- Paso 4: envío del formulario (validación, crear, guardar, repintar) y botón Cancelar.
+- Paso 5: `mostrarDetalle(id)` en `#detalle` (con Cerrar) + un único escuchador de clics en la tabla.
+- Paso 6: `idEditando`, `empezarEdicion(id)`, `salirDeEdicion()`; el submit crea o sustituye.
+- Paso 7: `borrarProducto(id)` con `confirm()` y `filter`.
+- Paso 8: revisión completa de `app.js` sin errores; limpiados 3 comentarios desfasados. Prueba automática con `jsdom` bloqueada (no se permite instalar paquetes de prueba).
+- Commit `05dab7b Fase 1 completa: CRUD con localStorage` → push hecho.
+
+### 20/11/2026 — Fase 2
+- Paso 1: Nest CLI 12.0.15 vía `npx`.
+- Paso 2: `nest new backend --skip-git`. NestJS 12: ESM (imports terminan en `.js`), Vitest, oxlint. El generador añadió cosas no pedidas; Cristina aprobó:
+  - Quitar `@nestjs/observe` (servicio externo de monitorización) de `package.json`, `app.module.ts` y `main.ts`. Nunca se ejecutó `observe link`.
+  - Añadir al `.gitignore` de la raíz `node_modules/`, `dist/` (el generador no creó `.gitignore`) y luego `*.tsbuildinfo`.
+  - Borrar `AGENTS.md`, `.agents/` y `.claude/` de `backend`.
+- Paso 3: `nest g module/controller/service products --no-spec` + `npm install class-validator class-transformer`.
+- Pasos 4–7: archivos en `backend/src/products/`:
+  - `dto/create-product.dto.ts`, `dto/update-product.dto.ts`: reglas de validación.
+  - `products.service.ts`: array en memoria, `findAll/findOne/create/update/remove`; 404 si el id no existe.
+  - `products.controller.ts`: los 5 endpoints; DELETE responde 204.
+  - `main.ts`: `enableCors()` + `ValidationPipe({ whitelist, forbidNonWhitelisted })`.
+- Pruebas de la API con curl (19): CRUD, defaults, 6 errores de validación, 404, CORS y preflight → todas OK.
+- Paso 8: `frontend/app.js` reescrito con `fetch`:
+  - Función `llamarApi(ruta, opciones)`: añade cabecera JSON, lanza `Error` con el mensaje del servidor, 204 → `null`.
+  - Ver/Editar/Borrar piden el producto con `GET /products/:id`.
+  - Si el servidor está apagado, la tabla muestra "No se puede conectar con el servidor. ¿Está arrancado?".
+  - Errores de validación del servidor se muestran con `alert()`.
+- Paso 9: prueba del frontend ejecutando su `llamarApi` real contra el servidor (11 comprobaciones OK, incluida la del servidor apagado); `npm test` y `npm run lint` OK. `jsdom` volvió a bloquearse, así que la interfaz (DOM) no se probó de forma automática.
 
 ## Decisiones
 | Fecha | Decisión | Motivo |
 |---|---|---|
 | 19/11 | Abrir `index.html` con doble clic (`file://`) | Sin instalar nada |
 | 19/11 | Detalle en un panel bajo la tabla | Más claro que `alert()`, más simple que un modal |
-| 19/11 | ID con `Date.now().toString()` | Simple; en la Fase 2 lo dará el servidor |
+| 19/11 | ID con `Date.now().toString()` (solo Fase 1) | Simple; en la Fase 2 lo da el servidor |
 | 19/11 | Validación HTML (`required`, `min`) + JS: nombre y marca no solo espacios | Suficiente y fácil |
 | 19/11 | `<select>` de categoría con "otro" por defecto | Nunca vacío |
 | 19/11 | Stock opcional; vacío = 0 | Según el modelo |
@@ -81,39 +86,48 @@
 | 19/11 | Lista vacía al empezar | Sin datos de ejemplo |
 | 19/11 | Comentarios breves por bloque | Legibilidad |
 | 19/11 | Un único formulario para crear y editar | Menos código |
-| 19/11 | Clave de localStorage: `productos` | — |
 | 19/11 | Pintar celdas con `textContent` | Evita inyectar HTML |
 | 20/11 | Usar Git + GitHub (antes: "sin git") | Petición de Cristina |
 | 20/11 | Git vía Command Line Tools de Apple | No hay Homebrew; es lo más directo |
 | 20/11 | Rama `main` | Coincide con GitHub |
-| 20/11 | Primer commit con el título `Fase1` (aunque la fase está a medias) | Elección de Cristina |
 | 20/11 | Sin línea de coautoría en los commits | Elección de Cristina |
 | 20/11 | Commit y push solo cuando Cristina lo pida | Control del proceso |
 | 20/11 | Autenticación HTTPS + token fine-grained en el Llavero | Sin instalar nada más |
-| 20/11 | `PROGRESO.md` como registro de contexto | No perder contexto entre sesiones |
 | 20/11 | Mantener el token aunque se pegó en el chat | Elección de Cristina: entorno de clase |
-| 20/11 | Botones de la tabla con un solo escuchador en `<tbody>` (delegación) | La tabla se repinta entera; no hay que reasignar eventos |
-| 20/11 | Panel de detalle con botón Cerrar; se oculta al vaciarse (`#detalle:empty`) | Simple, sin modal |
-| 20/11 | Modo edición con `idEditando` (null = crear); el botón cambia a "Guardar cambios" | Un solo formulario y un solo submit |
-| 20/11 | Al guardar se cierra el panel de detalle | Evita mostrar datos antiguos |
+| 20/11 | `PROGRESO.md` como registro de contexto | No perder contexto entre sesiones |
+| 20/11 | Botones de la tabla con un solo escuchador en `<tbody>` | La tabla se repinta entera |
+| 20/11 | Modo edición con `idEditando` (null = crear) | Un solo formulario y un solo submit |
 | 20/11 | Confirmación de borrado con `confirm()` nativo | Lo más simple |
-| 20/11 | Cerrar la Fase 1; luego, en la pausa, se limpiaron los comentarios desfasados | Petición de Cristina: "asegúrate de que esté cerrada" |
+| 20/11 | Nest CLI con `npx` (sin instalación global) | Sin sudo ni instalaciones globales |
+| 20/11 | Quitar `@nestjs/observe` y archivos de agentes de IA del backend | Proyecto local de aprendizaje; menos ruido |
+| 20/11 | Validación con `class-validator` + `ValidationPipe` | Lo estándar en Nest |
+| 20/11 | `UpdateProductDto` escrito a mano (no `PartialType`) | Evita instalar `@nestjs/mapped-types`; más explícito |
+| 20/11 | Rechazar campos desconocidos (`forbidNonWhitelisted`) | Errores claros |
+| 20/11 | id de texto con `crypto.randomUUID()` | En Fase 3 Mongo también usa ids de texto |
+| 20/11 | Categoría opcional en la API (por defecto "otro"); stock entero ≥ 0 | Coincide con el frontend |
+| 20/11 | DELETE responde 204 sin contenido | Convención REST |
+| 20/11 | Ver/Editar/Borrar consultan `GET /products/:id` | Usa el endpoint y siempre muestra datos actuales |
+| 20/11 | Se mantiene el ejemplo `AppController` ("Hello World!") | Sirve para comprobar que el servidor está vivo |
+| 20/11 | Puerto 3000; frontend con doble clic (`file://`) | Por defecto; con CORS abierto funciona |
 
 ## Pendientes / notas
-- Pasar la checklist de pruebas de la Fase 1 en el navegador:
-  1. Consola: `localStorage.removeItem('productos')` + recargar → "No hay productos"
-  2. Crear 3 productos (uno sin stock ni descripción) → recargar → siguen
-  3. Ver cada uno (sin descripción → "—")
-  4. Editar (precio y categoría) → no se duplica; Editar + Cancelar → no cambia
-  5. Borrar con Cancelar → sigue; con Aceptar → desaparece
-  6. Nombre solo espacios → aviso; precio negativo → bloqueado
-- Instalar paquetes (jsdom, Nest CLI…) requiere que Cristina esté presente y lo apruebe.
+- **Probar la Fase 2 en el navegador** (ver "Cómo probar").
+- **Commit de la Fase 2** cuando Cristina lo pida (`.gitignore`, `PROGRESO.md`, `frontend/app.js`, `backend/`).
+- Los datos de la Fase 2 se pierden al reiniciar el servidor (es lo esperado: array en memoria). Los productos guardados en localStorage en la Fase 1 ya no se usan.
+- Fase 3: hará falta Homebrew + MongoDB (guiar la instalación) y `@nestjs/mongoose`. Mongo usa `_id`: habrá que devolver `id` para que el frontend no cambie.
+- Las pruebas automáticas de interfaz con `jsdom` se bloquean; para probar sin navegador se usa Node + curl.
 - Python no está disponible en el sistema; para scripts se usa Node.
-- Nunca pegar el token de GitHub en el chat.
-- El token caduca según la fecha elegida al crearlo; al caducar, crear uno nuevo y volver a guardarlo en el Llavero.
-- Cambios sin commit: `PROGRESO.md` y `frontend/app.js` (pasos 4 a 8), `frontend/index.html` (comentario) → no subidos a GitHub.
+- Nunca pegar el token de GitHub en el chat. Al caducar, crear uno nuevo y guardarlo en el Llavero.
 
 ## Cómo probar
-- Frontend: doble clic en `frontend/index.html`.
-- Ver datos: DevTools → Application → Local Storage → `productos`.
-- Vaciar datos: en la consola, `localStorage.removeItem('productos')`.
+### Fase 2 (actual)
+1. Arrancar el backend: `cd backend` → `npm run start:dev` (se queda escuchando en http://localhost:3000; se para con Ctrl+C).
+2. Comprobar la API: abrir http://localhost:3000/products → `[]`.
+3. Abrir `frontend/index.html` con doble clic.
+4. Checklist:
+   - Crear 2–3 productos (uno sin stock ni descripción) → aparecen en la tabla.
+   - Recargar la página → siguen (vienen del servidor).
+   - Ver / Editar / Editar + Cancelar / Borrar (Cancelar y Aceptar) → igual que en la Fase 1.
+   - Parar el servidor (Ctrl+C) y recargar → "No se puede conectar con el servidor".
+   - Volver a arrancarlo → lista vacía (datos en memoria).
+- Probar la API a mano: `curl localhost:3000/products`, o en el navegador.

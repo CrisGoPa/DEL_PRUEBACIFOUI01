@@ -1,2 +1,7 @@
 # Archivos basura de macOS
 .DS_Store
+
+# Backend (Nest)
+node_modules/
+dist/
+*.tsbuildinfo
